@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090c16">
+    <meta name="description" content="Main Remi 41 atau Cangkulan melawan bot di Remi Room.">
+    <title>Remi Room — Neon Card Arena</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #090c16;
+            --panel: #111626;
+            --panel-light: #171e31;
+            --line: rgba(180, 195, 255, .13);
+            --text: #f3f5ff;
+            --muted: #929ab5;
+            --cyan: #66f2e4;
+            --purple: #a58bff;
+            --pink: #ff6d9c;
+            --gold: #ffd36a;
+            --red: #ff5874;
+            --green: #67e9a5;
+            --shadow: 0 24px 70px rgba(0, 0, 0, .38);
+        }
+
+        * { box-sizing: border-box; }
+
+        [hidden] { display: none !important; }
+
+        html { min-width: 320px; background: var(--bg); }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text);
+            background:
+                radial-gradient(ellipse at 50% -18%, rgba(86, 74, 184, .21), transparent 46%),
+                radial-gradient(ellipse at 100% 72%, rgba(25, 173, 168, .08), transparent 34%),
+                var(--bg);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button { color: inherit; font: inherit; }
+        button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+
+        .app-shell { width: min(1180px, calc(100% - 44px)); margin: 0 auto; }
+
+        .topbar {
+            min-height: 82px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .brand { display: inline-flex; align-items: center; gap: 11px; }
+        .brand-mark {
+            width: 39px;
+            height: 39px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(102, 242, 228, .42);
+            border-radius: 12px;
+            color: var(--cyan);
+            background: linear-gradient(145deg, rgba(102, 242, 228, .15), rgba(165, 139, 255, .13));
+            box-shadow: 0 0 24px rgba(102, 242, 228, .1);
+            font-size: 19px;
+            font-weight: 900;
+        }
+        .brand-name { font-size: 16px; font-weight: 800; letter-spacing: 1.4px; }
+        .brand-name span { color: var(--cyan); }
+        .brand-caption { margin-top: 3px; color: var(--muted); font-size: 9px; letter-spacing: 1.45px; }
+        .balance-box { display: flex; align-items: center; gap: 13px; padding: 8px 11px 8px 15px; border: 1px solid var(--line); border-radius: 12px; background: rgba(17, 22, 38, .82); }
+        .balance-label { display: block; margin-bottom: 3px; color: var(--muted); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; }
+        .balance-value { color: var(--cyan); font-variant-numeric: tabular-nums; font-size: 14px; font-weight: 800; }
+        .button {
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 15px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 750;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+        }
+        .button:hover:not(:disabled) { transform: translateY(-2px); }
+        .button:disabled { cursor: not-allowed; opacity: .43; transform: none; }
+        .button-small { min-height: 32px; padding: 0 10px; font-size: 10px; }
+        .button-primary { color: #071317; background: linear-gradient(100deg, var(--cyan), #8bffd9); box-shadow: 0 5px 22px rgba(102, 242, 228, .16); }
+        .button-primary:hover:not(:disabled) { box-shadow: 0 7px 28px rgba(102, 242, 228, .3); }
+        .button-secondary { border-color: var(--line); color: var(--text); background: rgba(255,255,255,.035); }
+        .button-secondary:hover:not(:disabled) { border-color: rgba(102,242,228,.55); background: rgba(102,242,228,.07); }
+        .button-danger { border-color: rgba(255, 88, 116, .27); color: #ff9aab; background: rgba(255, 88, 116, .075); }
+        .button-danger:hover:not(:disabled) { border-color: rgba(255,88,116,.6); background: rgba(255,88,116,.13); }
+        .button-allin { border-color: rgba(255,211,106,.35); color: var(--gold); background: rgba(255,211,106,.09); }
+        .button-allin:hover:not(:disabled) { border-color: var(--gold); }
+
+        .eyebrow { color: var(--cyan); font-size: 10px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+        .lobby { padding: 56px 0 50px; }
+        .hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 32px; align-items: center; margin-bottom: 28px; }
+        .hero h1 { margin: 12px 0 12px; font-size: clamp(36px, 5vw, 58px); letter-spacing: -2.6px; line-height: 1.04; }
+        .hero h1 span { color: var(--cyan); text-shadow: 0 0 26px rgba(102,242,228,.17); }
+        .hero-copy > p { max-width: 560px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+        .hero-note { display: inline-flex; align-items: center; gap: 7px; margin-top: 17px; color: #808aa8; font-size: 10px; }
+        .hero-note span { color: var(--green); }
+        .hero-art { position: relative; min-height: 196px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: radial-gradient(ellipse at 50% 110%, rgba(42,199,176,.2), transparent 65%), linear-gradient(145deg, rgba(27,34,58,.92), rgba(14,18,31,.96)); }
+        .hero-art::before, .hero-art::after { position: absolute; width: 185px; height: 185px; border: 1px solid rgba(102,242,228,.1); border-radius: 50%; content: ""; }
+        .hero-art::after { width: 245px; height: 245px; }
+        .neon-card { position: absolute; width: 91px; height: 126px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 1px solid rgba(255,255,255,.82); border-radius: 9px; color: #172033; background: linear-gradient(145deg, #fff, #dce5ef); box-shadow: 0 16px 38px rgba(0,0,0,.4); font-family: Georgia, serif; }
+        .neon-card strong { font-size: 39px; line-height: 1; }
+        .neon-card span { font-size: 24px; }
+        .neon-card.one { transform: translate(-56px, 5px) rotate(-17deg); }
+        .neon-card.two { transform: translate(0, -6px) rotate(0); color: #c94365; z-index: 1; }
+        .neon-card.three { transform: translate(57px, 5px) rotate(17deg); }
+        .neon-card.one, .neon-card.three { background: linear-gradient(145deg, #e1fbf7, #a5e8dc); }
+        .art-label { position: absolute; right: 15px; bottom: 13px; color: #8190a8; font-size: 9px; letter-spacing: 1.5px; }
+
+        .lobby-grid { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 18px; align-items: stretch; }
+        .panel { border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(150deg, rgba(21,27,45,.96), rgba(14,18,30,.97)); box-shadow: var(--shadow); }
+        .settings-panel { padding: 24px; }
+        .panel-title { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 21px; }
+        .panel-title h2 { margin: 0; font-size: 16px; letter-spacing: -.3px; }
+        .panel-title span { color: var(--muted); font-size: 10px; }
+        .setting-block + .setting-block { margin-top: 22px; }
+        .setting-label { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; color: #dce1f2; font-size: 11px; font-weight: 750; }
+        .setting-label small { color: var(--muted); font-size: 10px; font-weight: 500; }
+        .choice-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; }
+        .choice {
+            min-height: 66px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            color: #c8cde0;
+            background: rgba(255,255,255,.02);
+            cursor: pointer;
+            text-align: left;
+            transition: border-color .18s ease, background .18s ease, transform .18s ease;
+        }
+        .choice:hover { border-color: rgba(165,139,255,.5); transform: translateY(-1px); }
+        .choice.selected { border-color: rgba(102,242,228,.65); color: white; background: linear-gradient(110deg, rgba(102,242,228,.1), rgba(165,139,255,.09)); box-shadow: inset 0 0 20px rgba(102,242,228,.025); }
+        .choice-icon { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px; color: var(--cyan); background: rgba(102,242,228,.1); font-family: Georgia, serif; font-size: 18px; }
+        .choice:nth-child(2) .choice-icon { color: var(--purple); background: rgba(165,139,255,.12); }
+        .choice strong { display: block; margin-bottom: 3px; font-size: 11px; }
+        .choice small { display: block; color: var(--muted); font-size: 9px; }
+        .player-options { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .player-option { min-height: 41px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: rgba(255,255,255,.02); cursor: pointer; font-size: 11px; font-weight: 700; transition: .18s ease; }
+        .player-option:hover { border-color: rgba(165,139,255,.55); color: var(--text); }
+        .player-option.selected { border-color: var(--purple); color: #e6deff; background: rgba(165,139,255,.13); box-shadow: 0 0 18px rgba(165,139,255,.08); }
+        .difficulty-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+        .difficulty-option { min-height: 51px; padding: 8px 6px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: rgba(255,255,255,.02); cursor: pointer; text-align: center; transition: .18s ease; }
+        .difficulty-option strong, .difficulty-option small { display: block; }
+        .difficulty-option strong { color: #dce1f2; font-size: 10px; }
+        .difficulty-option small { margin-top: 4px; font-size: 8px; }
+        .difficulty-option:hover { border-color: rgba(165,139,255,.55); }
+        .difficulty-option.selected { border-color: rgba(102,242,228,.55); background: rgba(102,242,228,.075); }
+        .difficulty-option.selected strong { color: var(--cyan); }
+        .bet-editor { display: flex; align-items: stretch; gap: 8px; }
+        .bet-value { min-width: 0; flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 8px 13px; border: 1px solid var(--line); border-radius: 10px; background: rgba(4,7,14,.36); }
+        .bet-value small { margin-bottom: 3px; color: var(--muted); font-size: 9px; }
+        .bet-value strong { color: var(--gold); font-variant-numeric: tabular-nums; font-size: 17px; }
+        .bet-controls { display: flex; gap: 7px; }
+        .bet-controls .button { min-height: 49px; padding: 0 10px; font-size: 10px; white-space: nowrap; }
+        .minimum-note { margin: 8px 0 0; color: #747d98; font-size: 9px; }
+
+        .start-panel { display: flex; flex-direction: column; justify-content: space-between; padding: 22px; }
+        .start-top { display: flex; align-items: center; gap: 11px; }
+        .start-icon { width: 39px; height: 39px; display: grid; place-items: center; border: 1px solid rgba(165,139,255,.27); border-radius: 12px; color: var(--purple); background: rgba(165,139,255,.1); font-size: 20px; }
+        .start-top strong { display: block; font-size: 12px; }
+        .start-top small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
+        .summary { margin: 22px 0; padding: 14px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+        .summary-row { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 10px; }
+        .summary-row + .summary-row { margin-top: 11px; }
+        .summary-row strong { color: #e7eafb; font-weight: 700; text-align: right; }
+        .start-button { width: 100%; min-height: 48px; }
+        .lobby-warning { min-height: 16px; margin: 11px 0 0; color: var(--red); font-size: 10px; line-height: 1.5; }
+        .reset-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 16px; padding-top: 15px; border-top: 1px solid var(--line); }
+        .reset-row span { color: var(--muted); font-size: 9px; line-height: 1.5; }
+        .storage-warning { margin: 15px 0 0; color: var(--gold); font-size: 10px; line-height: 1.5; }
+        .footer-note { margin: 17px 0 0; color: #68718b; font-size: 9px; text-align: center; }
+
+        .game-screen { padding: 28px 0 48px; }
+        .game-topline { display: flex; align-items: center; justify-content: space-between; gap: 15px; margin-bottom: 17px; }
+        .game-topline h1 { margin: 5px 0 0; font-size: 22px; }
+        .game-top-meta { display: flex; align-items: center; gap: 9px; }
+        .meta-pill { display: flex; align-items: center; gap: 7px; min-height: 34px; padding: 0 11px; border: 1px solid var(--line); border-radius: 9px; color: var(--muted); background: rgba(17,22,38,.78); font-size: 10px; }
+        .meta-pill strong { color: var(--gold); font-size: 11px; }
+        .table-panel { padding: 18px; overflow: hidden; }
+        .table-status-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+        .table-status-row p { margin: 0; color: var(--muted); font-size: 10px; }
+        .round-tag { padding: 6px 9px; border: 1px solid rgba(102,242,228,.18); border-radius: 7px; color: var(--cyan); background: rgba(102,242,228,.055); font-size: 9px; font-weight: 800; letter-spacing: .8px; }
+        .seats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+        .seat {
+            position: relative;
+            min-height: 101px;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: rgba(255,255,255,.025);
+            transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+        }
+        .seat.active { border-color: rgba(102,242,228,.72); background: linear-gradient(145deg, rgba(102,242,228,.1), rgba(165,139,255,.06)); box-shadow: 0 0 22px rgba(102,242,228,.08); }
+        .seat.is-user { border-color: rgba(165,139,255,.3); }
+        .seat.is-user.active { border-color: var(--cyan); }
+        .seat-head { display: flex; align-items: center; gap: 7px; min-width: 0; }
+        .seat-avatar { width: 27px; height: 27px; flex: 0 0 auto; display: grid; place-items: center; border: 1px solid rgba(165,139,255,.34); border-radius: 9px; color: var(--purple); background: rgba(165,139,255,.1); font-size: 10px; font-weight: 800; }
+        .is-user .seat-avatar { border-color: rgba(102,242,228,.38); color: var(--cyan); background: rgba(102,242,228,.1); }
+        .seat-name { min-width: 0; overflow: hidden; color: #e6e9f5; font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+        .seat-order { margin-left: auto; color: #66708c; font-size: 8px; }
+        .seat-info { display: flex; justify-content: space-between; gap: 7px; margin-top: 11px; color: var(--muted); font-size: 9px; }
+        .seat-info strong { color: #e1e6f4; font-weight: 700; }
+        .seat-turn { margin-top: 8px; color: var(--cyan); font-size: 9px; font-weight: 800; }
+        .seat-turn.waiting { color: #68718b; font-weight: 500; }
+        .table-core { min-height: 210px; position: relative; display: grid; grid-template-columns: 1fr minmax(220px, .75fr) 1fr; align-items: center; gap: 18px; margin: 14px 0; padding: 20px; border: 1px solid rgba(102,242,228,.13); border-radius: 16px; background: radial-gradient(ellipse at 50% 47%, rgba(33,88,91,.38), rgba(16,23,39,.97) 69%); }
+        .table-core::before { position: absolute; inset: 14px; border: 1px solid rgba(102,242,228,.055); border-radius: 12px; content: ""; pointer-events: none; }
+        .pile-block, .center-block { position: relative; z-index: 1; text-align: center; }
+        .pile-title { color: var(--muted); font-size: 8px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; }
+        .pile-card, .face-card {
+            width: 55px;
+            height: 77px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 9px auto 6px;
+            border: 1px solid rgba(255,255,255,.83);
+            border-radius: 7px;
+            color: #172033;
+            background: linear-gradient(145deg, #fff, #dce5ef);
+            box-shadow: 0 8px 21px rgba(0,0,0,.28);
+            font-family: Georgia, serif;
+        }
+        .pile-card { border: 1px solid rgba(102,242,228,.48); color: var(--cyan); background: repeating-linear-gradient(45deg, #182840 0 4px, #1d3451 4px 8px); font-family: inherit; font-size: 23px; }
+        .face-card.red, .playing-card.red { color: #d94369; }
+        .face-card strong { font-size: 27px; line-height: 1; }
+        .face-card span { font-size: 18px; }
+        .pile-count { color: #7e88a4; font-variant-numeric: tabular-nums; font-size: 9px; }
+        .center-block { min-width: 0; }
+        .center-message { min-height: 16px; margin: 0 0 10px; color: #c5ccdf; font-size: 10px; }
+        .anchor-card { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 9px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); background: rgba(4,7,14,.3); font-size: 9px; }
+        .anchor-card strong { font-size: 14px; }
+        .center-cards { min-height: 84px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 7px; }
+        .trick-play { width: 45px; text-align: center; }
+        .trick-play .face-card { width: 41px; height: 57px; margin: 0 auto 4px; }
+        .trick-play .face-card strong { font-size: 20px; }
+        .trick-play .face-card span { font-size: 14px; }
+        .trick-play small { display: block; overflow: hidden; color: var(--muted); font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+        .trick-suit { color: var(--cyan); font-size: 22px; font-weight: 800; }
+        .game-message { min-height: 17px; margin: 12px 0 0; color: var(--muted); font-size: 10px; text-align: center; }
+        .hand-section { margin-top: 17px; padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(8,11,20,.62); }
+        .hand-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+        .hand-title { color: #e5e9f6; font-size: 11px; font-weight: 800; }
+        .live-score { display: inline-flex; align-items: center; gap: 7px; padding: 6px 9px; border: 1px solid rgba(255,211,106,.23); border-radius: 8px; color: #c5b88e; background: rgba(255,211,106,.055); font-size: 9px; }
+        .live-score strong { color: var(--gold); font-variant-numeric: tabular-nums; font-size: 11px; }
+        .hand-cards { min-height: 104px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; }
+        .playing-card {
+            position: relative;
+            width: 62px;
+            height: 88px;
+            display: flex;
+            flex: 0 0 auto;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255,255,255,.9);
+            border-radius: 8px;
+            color: #182034;
+            background: linear-gradient(145deg, #fff, #e2e8f1);
+            box-shadow: 0 8px 18px rgba(0,0,0,.28);
+            cursor: pointer;
+            font-family: Georgia, serif;
+            transition: transform .16s ease, box-shadow .16s ease, outline .16s ease;
+        }
+        .playing-card:hover { transform: translateY(-5px); }
+        .playing-card.selected { outline: 2px solid var(--cyan); outline-offset: 2px; transform: translateY(-9px); box-shadow: 0 12px 24px rgba(102,242,228,.16); }
+        .playing-card.illegal { border-color: var(--red); box-shadow: 0 0 12px rgba(255,88,116,.35); }
+        .playing-card strong { font-size: 25px; line-height: 1; }
+        .playing-card span { margin-top: 4px; font-size: 18px; }
+        .hand-cards.inactive .playing-card { cursor: default; opacity: .78; }
+        .hand-cards.inactive .playing-card:hover { transform: none; }
+        .hand-cards.shake { animation: shake .32s ease; }
+        @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+        .game-controls { min-height: 50px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 13px; }
+        .turn-hint { width: 100%; margin: 0; color: var(--muted); font-size: 9px; text-align: center; }
+        .game-controls .button { min-height: 37px; padding: 0 12px; font-size: 10px; }
+        .claim-button { border-color: rgba(255,211,106,.42); color: var(--gold); background: rgba(255,211,106,.1); }
+        .claim-button:hover:not(:disabled) { box-shadow: 0 0 20px rgba(255,211,106,.13); }
+        .game-rules { margin: 13px 2px 0; color: #707a97; font-size: 9px; line-height: 1.6; text-align: center; }
+
+        .overlay {
+            position: fixed;
+            z-index: 20;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            padding: 20px;
+            background: rgba(5,7,14,.78);
+            backdrop-filter: blur(9px);
+        }
+        .modal-card {
+            width: min(430px, 100%);
+            padding: 25px;
+            border: 1px solid rgba(165,139,255,.3);
+            border-radius: 17px;
+            background: linear-gradient(150deg, #171d31, #0d111d);
+            box-shadow: 0 22px 80px rgba(0,0,0,.65), 0 0 48px rgba(102,242,228,.06);
+        }
+        .modal-icon { width: 43px; height: 43px; display: grid; place-items: center; margin-bottom: 15px; border: 1px solid rgba(255,211,106,.25); border-radius: 13px; color: var(--gold); background: rgba(255,211,106,.09); font-size: 19px; }
+        .modal-card h2 { margin: 0 0 9px; font-size: 19px; }
+        .modal-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 21px; }
+        .result-modal { text-align: center; }
+        .result-modal .modal-icon { margin-right: auto; margin-left: auto; color: var(--cyan); border-color: rgba(102,242,228,.26); background: rgba(102,242,228,.09); }
+        .result-modal h2 { font-size: 21px; }
+        .result-modal .result-detail { margin-top: 8px; color: #c3cbe0; font-size: 12px; }
+        .result-modal .button { width: 100%; margin-top: 22px; }
+        .shuffle-card { width: min(480px, 100%); padding: 29px; text-align: center; }
+        .shuffle-emblem { width: 54px; height: 54px; display: grid; place-items: center; margin: 0 auto 16px; border: 1px solid rgba(102,242,228,.35); border-radius: 16px; color: var(--cyan); background: rgba(102,242,228,.08); font-size: 24px; animation: pulse 1s ease-in-out infinite alternate; }
+        @keyframes pulse { to { box-shadow: 0 0 30px rgba(102,242,228,.3); transform: scale(1.05); } }
+        .shuffle-card h2 { margin: 0; font-size: 18px; }
+        .shuffle-card > p { margin: 7px 0 19px; color: var(--muted); font-size: 10px; }
+        .shuffle-order { display: grid; gap: 7px; text-align: left; }
+        .order-row { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; color: #dfe4f4; background: rgba(255,255,255,.025); font-size: 10px; }
+        .order-row strong { width: 25px; color: var(--cyan); font-size: 9px; }
+        .toast {
+            position: fixed;
+            z-index: 40;
+            right: 20px;
+            bottom: 20px;
+            max-width: min(360px, calc(100% - 40px));
+            padding: 12px 16px;
+            border: 1px solid rgba(255,88,116,.4);
+            border-radius: 11px;
+            color: #ffd9df;
+            background: rgba(47,17,30,.96);
+            box-shadow: 0 12px 35px rgba(0,0,0,.4);
+            font-size: 11px;
+            animation: toast-in .18s ease-out;
+        }
+        @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 900px) {
+            .lobby-grid { grid-template-columns: minmax(0, 1fr) 270px; }
+            .bet-editor { flex-wrap: wrap; }
+            .bet-value { min-height: 49px; }
+            .bet-controls { width: 100%; }
+            .bet-controls .button { flex: 1; }
+            .seats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .table-core { grid-template-columns: .75fr 1.5fr .75fr; gap: 8px; }
+        }
+        @media (max-width: 650px) {
+            .app-shell { width: min(100% - 28px, 540px); }
+            .topbar { min-height: 70px; }
+            .brand-caption { font-size: 8px; }
+            .balance-box { gap: 8px; padding: 7px 8px 7px 10px; }
+            .balance-value { font-size: 12px; }
+            .balance-label { font-size: 8px; }
+            .button-small { min-height: 30px; padding: 0 8px; font-size: 9px; }
+            .lobby { padding-top: 35px; }
+            .hero { grid-template-columns: 1fr; gap: 18px; margin-bottom: 16px; }
+            .hero h1 { font-size: clamp(38px, 11vw, 52px); }
+            .hero-copy > p { font-size: 12px; }
+            .hero-art { min-height: 167px; }
+            .neon-card { width: 76px; height: 105px; }
+            .neon-card strong { font-size: 33px; }
+            .lobby-grid { grid-template-columns: 1fr; }
+            .settings-panel, .start-panel { padding: 18px; }
+            .start-panel { min-height: auto; }
+            .summary { margin: 15px 0; }
+            .start-button { margin-top: 2px; }
+            .game-screen { padding-top: 20px; }
+            .game-topline { align-items: flex-start; flex-direction: column; }
+            .game-topline h1 { font-size: 19px; }
+            .game-top-meta { width: 100%; justify-content: space-between; }
+            .table-panel { padding: 11px; }
+            .seats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+            .seat { min-height: 94px; padding: 8px; }
+            .seat-info { font-size: 8px; }
+            .table-core { min-height: 192px; grid-template-columns: 54px minmax(0, 1fr) 54px; gap: 3px; padding: 12px 6px; }
+            .pile-title { font-size: 7px; letter-spacing: .6px; }
+            .pile-card, .face-card { width: 45px; height: 64px; }
+            .pile-card { font-size: 19px; }
+            .face-card strong { font-size: 23px; }
+            .center-message { font-size: 9px; }
+            .center-cards { min-height: 70px; gap: 4px; }
+            .trick-play { width: 37px; }
+            .trick-play .face-card { width: 34px; height: 48px; }
+            .trick-play .face-card strong { font-size: 17px; }
+            .trick-play small { font-size: 7px; }
+            .anchor-card { font-size: 8px; }
+            .hand-section { padding: 11px 8px; }
+            .hand-cards { min-height: 91px; gap: 6px; }
+            .playing-card { width: 51px; height: 74px; }
+            .playing-card strong { font-size: 21px; }
+            .playing-card span { font-size: 16px; }
+            .hand-title { font-size: 10px; }
+            .live-score { padding: 5px 7px; font-size: 8px; }
+            .live-score strong { font-size: 10px; }
+            .game-controls .button { flex: 1 1 40%; }
+            .footer-note { margin-bottom: 18px; }
+        }
+        @media (max-width: 390px) {
+            .app-shell { width: calc(100% - 20px); }
+            .brand { gap: 7px; }
+            .brand-mark { width: 34px; height: 34px; }
+            .brand-name { font-size: 13px; }
+            .brand-caption { letter-spacing: .8px; }
+            .balance-box { gap: 6px; }
+            .balance-value { font-size: 11px; }
+            .reset-row { align-items: flex-start; }
+            .bet-controls .button { padding: 0 6px; font-size: 9px; }
+            .seat-avatar { width: 23px; height: 23px; }
+            .seat-name { font-size: 9px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand" aria-label="Remi Room">
+                <span class="brand-mark" aria-hidden="true">R</span>
+                <div>
+                    <div class="brand-name">REMI<span>ROOM</span></div>
+                    <div class="brand-caption">NEON CARD ARENA</div>
+                </div>
+            </div>
+            <div class="balance-box">
+                <div>
+                    <span class="balance-label">Saldo kamu</span>
+                    <strong class="balance-value" id="header-balance">Rp 50.000</strong>
+                </div>
+                <button class="button button-danger button-small" id="reset-balance">Reset Saldo</button>
+            </div>
+        </header>
+
+        <main>
+            <section class="lobby" id="lobby-screen">
+                <div class="hero">
+                    <div class="hero-copy">
+                        <div class="eyebrow">♠ &nbsp; MEJA KARTU VIRTUAL</div>
+                        <h1>Strategi di meja.<br><span>Neon di arena.</span></h1>
+                        <p>Pilih Remi 41 atau Cangkulan, atur meja, lalu uji strategimu melawan bot. Kartu diacak setiap ronde; tidak ada hasil menang atau kalah yang dikunci.</p>
+                        <div class="hero-note"><span>●</span> Tanpa akun, langsung main di browser</div>
+                    </div>
+                    <div class="hero-art" aria-label="Ilustrasi kartu remi">
+                        <div class="neon-card one"><strong>A</strong><span>♠</span></div>
+                        <div class="neon-card two"><strong>Q</strong><span>♥</span></div>
+                        <div class="neon-card three"><strong>K</strong><span>♣</span></div>
+                        <div class="art-label">PILIH MODEMU</div>
+                    </div>
+                </div>
+
+                <div class="lobby-grid">
+                    <section class="panel settings-panel" aria-labelledby="setup-title">
+                        <div class="panel-title">
+                            <h2 id="setup-title">Atur permainan</h2>
+                            <span>01 / 03</span>
+                        </div>
+
+                        <div class="setting-block">
+                            <div class="setting-label">Mode game <small>Pilih aturan meja</small></div>
+                            <div class="choice-row" id="mode-options">
+                                <button class="choice selected" type="button" data-mode="remi41" aria-pressed="true">
+                                    <span class="choice-icon">♠</span>
+                                    <span><strong>Remi 41</strong><small>Draw, buang, kejar 41</small></span>
+                                </button>
+                                <button class="choice" type="button" data-mode="cangkulan" aria-pressed="false">
+                                    <span class="choice-icon">♣</span>
+                                    <span><strong>Cangkulan</strong><small>Ikuti kembang, habiskan kartu</small></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setting-block">
+                            <div class="setting-label">Jumlah pemain <small>Termasuk kamu</small></div>
+                            <div class="player-options" id="player-options" role="group" aria-label="Jumlah pemain">
+                                <button class="player-option" type="button" data-players="2" aria-pressed="false">2</button>
+                                <button class="player-option" type="button" data-players="3" aria-pressed="false">3</button>
+                                <button class="player-option selected" type="button" data-players="4" aria-pressed="true">4</button>
+                                <button class="player-option" type="button" data-players="5" aria-pressed="false">5</button>
+                                <button class="player-option" type="button" data-players="6" aria-pressed="false">6</button>
+                            </div>
+                        </div>
+
+                        <div class="setting-block">
+                            <div class="setting-label">Kesulitan bot <small>Hasil tetap acak</small></div>
+                            <div class="difficulty-options" id="difficulty-options" role="group" aria-label="Kesulitan bot">
+                                <button class="difficulty-option" type="button" data-difficulty="easy" aria-pressed="false">
+                                    <strong>Mudah</strong><small>Langkah lebih acak</small>
+                                </button>
+                                <button class="difficulty-option selected" type="button" data-difficulty="hard" aria-pressed="true">
+                                    <strong>Sulit</strong><small>Strategi seimbang</small>
+                                </button>
+                                <button class="difficulty-option" type="button" data-difficulty="very-hard" aria-pressed="false">
+                                    <strong>Sangat Sulit</strong><small>Bot lebih cermat</small>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setting-block">
+                            <div class="setting-label">Taruhan per pemain <small>Min. Rp 10.000</small></div>
+                            <div class="bet-editor">
+                                <div class="bet-value">
+                                    <small>Taruhan ronde ini</small>
+                                    <strong id="bet-display">Rp 10.000</strong>
+                                </div>
+                                <div class="bet-controls">
+                                    <button class="button button-secondary" type="button" id="bet-decrease">− Rp 5.000</button>
+                                    <button class="button button-secondary" type="button" id="bet-increase">+ Rp 5.000</button>
+                                    <button class="button button-allin" type="button" id="bet-all-in">ALL-IN</button>
+                                </div>
+                            </div>
+                            <p class="minimum-note">Pot meja adalah total taruhan dari semua pemain.</p>
+                        </div>
+                    </section>
+
+                    <aside class="panel start-panel">
+                        <div>
+                            <div class="start-top">
+                                <span class="start-icon" aria-hidden="true">✦</span>
+                                <span><strong>Meja siap dibuka</strong><small>Bot AI akan mengisi kursi lain</small></span>
+                            </div>
+                            <div class="summary">
+                                <div class="summary-row"><span>Mode</span><strong id="summary-mode">Remi 41</strong></div>
+                                <div class="summary-row"><span>Pemain</span><strong id="summary-players">4 orang</strong></div>
+                                <div class="summary-row"><span>Kesulitan</span><strong id="summary-difficulty">Sulit</strong></div>
+                                <div class="summary-row"><span>Pot awal</span><strong id="summary-pot">Rp 40.000</strong></div>
+                            </div>
+                            <button class="button button-primary start-button" type="button" id="start-game">Mulai Permainan <span aria-hidden="true">→</span></button>
+                            <p class="lobby-warning" id="lobby-warning" aria-live="polite"></p>
+                        </div>
+                        <div>
+                            <div class="reset-row">
+                                <span>Saldo sesi tersimpan selama tab ini terbuka.</span>
+                                <button class="button button-danger button-small" type="button" id="reset-balance-secondary">Reset Saldo</button>
+                            </div>
+                            <p class="storage-warning" id="storage-warning" hidden></p>
+                        </div>
+                    </aside>
+                </div>
+                <p class="footer-note">Saldo dan taruhan hanya simulasi dalam game, bukan uang sungguhan dan tidak dapat diuangkan.</p>
+            </section>
+
+            <section class="game-screen" id="game-screen" hidden>
+                <div class="game-topline">
+                    <div>
+                        <div class="eyebrow">NEON CARD ARENA</div>
+                        <h1 id="game-title">Remi 41</h1>
+                    </div>
+                    <div class="game-top-meta">
+                        <div class="meta-pill">SALDO <strong id="game-balance">Rp 50.000</strong></div>
+                        <div class="meta-pill">POT MEJA <strong id="pot-display">Rp 40.000</strong></div>
+                    </div>
+                </div>
+
+                <section class="panel table-panel" aria-label="Meja permainan">
+                    <div class="table-status-row">
+                        <p id="table-description">Urutan giliran sudah ditetapkan.</p>
+                        <span class="round-tag" id="mode-tag">REMI 41</span>
+                    </div>
+                    <div class="seats" id="seats" aria-label="Posisi pemain"></div>
+                    <div class="table-core">
+                        <div class="pile-block">
+                            <div class="pile-title" id="deck-title">Deck tertutup</div>
+                            <div class="pile-card" aria-hidden="true">✦</div>
+                            <div class="pile-count" id="deck-count">0 kartu</div>
+                        </div>
+                        <div class="center-block">
+                            <p class="center-message" id="center-message">Meja permainan</p>
+                            <div class="anchor-card" id="anchor-card" hidden></div>
+                            <div class="center-cards" id="center-cards"></div>
+                        </div>
+                        <div class="pile-block">
+                            <div class="pile-title" id="discard-title">Kartu buangan</div>
+                            <div id="discard-view"></div>
+                            <div class="pile-count" id="discard-count"></div>
+                        </div>
+                    </div>
+                    <p class="game-message" id="game-message" aria-live="polite"></p>
+
+                    <section class="hand-section" aria-label="Kartu di tangan kamu">
+                        <div class="hand-head">
+                            <span class="hand-title">KARTU KAMU</span>
+                            <span class="live-score" id="live-score-wrap"><span>LIVE SKOR</span><strong id="live-score">0</strong></span>
+                        </div>
+                        <div class="hand-cards" id="hand-cards"></div>
+                        <div class="game-controls" id="game-controls"></div>
+                    </section>
+                </section>
+                <p class="game-rules" id="game-rules"></p>
+            </section>
+        </main>
+    </div>
+
+    <div class="overlay" id="reset-modal" hidden>
+        <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+            <div class="modal-icon" aria-hidden="true">↻</div>
+            <h2 id="reset-title">Reset saldo?</h2>
+            <p>Saldo kamu akan diatur ulang menjadi tepat Rp 50.000. Aksi ini tidak dapat dibatalkan.</p>
+            <div class="modal-actions">
+                <button class="button button-secondary" type="button" id="cancel-reset">Batal</button>
+                <button class="button button-danger" type="button" id="confirm-reset">Ya, Reset Saldo</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="overlay" id="shuffle-overlay" hidden>
+        <section class="modal-card shuffle-card" role="status" aria-live="polite">
+            <div class="shuffle-emblem" aria-hidden="true">⟳</div>
+            <h2>Mengacak Urutan Main...</h2>
+            <p>Posisi pemain di meja ditentukan secara acak.</p>
+            <div class="shuffle-order" id="shuffle-order"></div>
+        </section>
+    </div>
+
+    <div class="overlay" id="result-modal" hidden>
+        <section class="modal-card result-modal" role="dialog" aria-modal="true" aria-labelledby="result-title">
+            <div class="modal-icon" id="result-icon" aria-hidden="true">✦</div>
+            <h2 id="result-title">Ronde selesai</h2>
+            <p class="result-detail" id="result-detail"></p>
+            <button class="button button-primary" type="button" id="return-to-menu">Kembali ke Menu Awal</button>
+        </section>
+    </div>
+
+    <div class="toast" id="game-toast" role="status" aria-live="polite" hidden></div>
+
+    <script>
+        "use strict";
+
+        const INITIAL_BALANCE = 50000;
+        const MIN_BET = 10000;
+        const BET_STEP = 5000;
+        const STORAGE_KEY = "remi-room-session-balance";
+        const BOT_NAMES = ["Ardi", "Naya", "Bima", "Siska", "Danu"];
+        const SUITS = [
+            { symbol: "♠", color: "black" },
+            { symbol: "♥", color: "red" },
+            { symbol: "♦", color: "red" },
+            { symbol: "♣", color: "black" }
+        ];
+
+        const elements = {
+            lobby: document.querySelector("#lobby-screen"),
+            game: document.querySelector("#game-screen"),
+            headerBalance: document.querySelector("#header-balance"),
+            gameBalance: document.querySelector("#game-balance"),
+            betDisplay: document.querySelector("#bet-display"),
+            summaryMode: document.querySelector("#summary-mode"),
+            summaryPlayers: document.querySelector("#summary-players"),
+            summaryDifficulty: document.querySelector("#summary-difficulty"),
+            summaryPot: document.querySelector("#summary-pot"),
+            lobbyWarning: document.querySelector("#lobby-warning"),
+            storageWarning: document.querySelector("#storage-warning"),
+            startButton: document.querySelector("#start-game"),
+            modeTag: document.querySelector("#mode-tag"),
+            gameTitle: document.querySelector("#game-title"),
+            potDisplay: document.querySelector("#pot-display"),
+            tableDescription: document.querySelector("#table-description"),
+            seats: document.querySelector("#seats"),
+            deckTitle: document.querySelector("#deck-title"),
+            deckCount: document.querySelector("#deck-count"),
+            discardTitle: document.querySelector("#discard-title"),
+            discardView: document.querySelector("#discard-view"),
+            discardCount: document.querySelector("#discard-count"),
+            centerMessage: document.querySelector("#center-message"),
+            anchorCard: document.querySelector("#anchor-card"),
+            centerCards: document.querySelector("#center-cards"),
+            gameMessage: document.querySelector("#game-message"),
+            handCards: document.querySelector("#hand-cards"),
+            liveScoreWrap: document.querySelector("#live-score-wrap"),
+            liveScore: document.querySelector("#live-score"),
+            gameControls: document.querySelector("#game-controls"),
+            gameRules: document.querySelector("#game-rules"),
+            resetModal: document.querySelector("#reset-modal"),
+            shuffleOverlay: document.querySelector("#shuffle-overlay"),
+            shuffleOrder: document.querySelector("#shuffle-order"),
+            resultModal: document.querySelector("#result-modal"),
+            resultTitle: document.querySelector("#result-title"),
+            resultDetail: document.querySelector("#result-detail"),
+            resultIcon: document.querySelector("#result-icon"),
+            toast: document.querySelector("#game-toast")
+        };
+
+        let userBalance = readInitialBalance();
+        let bet = Math.min(MIN_BET, userBalance);
+        let selectedMode = "remi41";
+        let selectedPlayerCount = 4;
+        let selectedDifficulty = "hard";
+        let botBalances = new Map(BOT_NAMES.map((name, index) => [`bot-${index + 1}`, INITIAL_BALANCE]));
+        let cardSequence = 0;
+        let game = null;
+        let botThinkTimeout = null;
+        let transitionTimeout = null;
+        let toastTimeout = null;
+        let resetReturnFocus = null;
+
+        function readInitialBalance() {
+            try {
+                const saved = sessionStorage.getItem(STORAGE_KEY);
+                if (saved === null) {
+                    sessionStorage.setItem(STORAGE_KEY, String(INITIAL_BALANCE));
+                    return INITIAL_BALANCE;
+                }
+
+                const parsed = Number(saved);
+                if (!Number.isSafeInteger(parsed) || parsed < 0) {
+                    sessionStorage.setItem(STORAGE_KEY, String(INITIAL_BALANCE));
+                    return INITIAL_BALANCE;
+                }
+                return parsed;
+            } catch (error) {
+                console.error("Saldo sesi tidak dapat dibaca dari sessionStorage.", error);
+                elements.storageWarning.textContent = "Penyimpanan sesi tidak tersedia di browser ini. Saldo mungkin tidak bertahan setelah halaman ditutup.";
+                elements.storageWarning.hidden = false;
+                return INITIAL_BALANCE;
+            }
+        }
+
+        function saveBalance() {
+            try {
+                sessionStorage.setItem(STORAGE_KEY, String(userBalance));
+                elements.storageWarning.hidden = true;
+                elements.storageWarning.textContent = "";
+            } catch (error) {
+                console.error("Saldo sesi tidak dapat disimpan ke sessionStorage.", error);
+                elements.storageWarning.textContent = "Penyimpanan sesi tidak tersedia di browser ini. Saldo mungkin tidak bertahan setelah halaman ditutup.";
+                elements.storageWarning.hidden = false;
+            }
+        }
+
+        function formatRupiah(amount) {
+            return `Rp ${Math.max(0, Math.floor(amount)).toLocaleString("id-ID")}`;
+        }
+
+        function updateBalanceDisplay() {
+            elements.headerBalance.textContent = formatRupiah(userBalance);
+            elements.gameBalance.textContent = formatRupiah(userBalance);
+        }
+
+        function updateLobby() {
+            updateBalanceDisplay();
+            if (userBalance >= MIN_BET && bet < MIN_BET) bet = MIN_BET;
+            if (bet > userBalance) bet = userBalance;
+
+            elements.betDisplay.textContent = formatRupiah(bet);
+            elements.summaryMode.textContent = selectedMode === "remi41" ? "Remi 41" : "Cangkulan";
+            elements.summaryPlayers.textContent = `${selectedPlayerCount} orang`;
+            elements.summaryDifficulty.textContent = difficultyLabel(selectedDifficulty);
+            elements.summaryPot.textContent = formatRupiah(bet * selectedPlayerCount);
+
+            document.querySelector("#bet-decrease").disabled = bet <= MIN_BET || userBalance < MIN_BET;
+            document.querySelector("#bet-increase").disabled = bet >= userBalance || userBalance < MIN_BET;
+            document.querySelector("#bet-all-in").disabled = userBalance <= 0;
+            elements.startButton.disabled = userBalance < MIN_BET || bet < MIN_BET || bet > userBalance;
+            elements.lobbyWarning.textContent = userBalance < MIN_BET ? "Saldo tidak cukup! Silakan klik Reset Saldo." : "";
+        }
+
+        function setBet(value) {
+            if (userBalance < MIN_BET) {
+                bet = userBalance;
+            } else {
+                bet = Math.max(MIN_BET, Math.min(Math.floor(value), userBalance));
+            }
+            updateLobby();
+        }
+
+        function openResetModal(event) {
+            resetReturnFocus = event.currentTarget;
+            elements.resetModal.hidden = false;
+            document.body.style.overflow = "hidden";
+            document.querySelector("#cancel-reset").focus();
+        }
+
+        function closeResetModal() {
+            elements.resetModal.hidden = true;
+            document.body.style.overflow = "";
+            if (resetReturnFocus) resetReturnFocus.focus();
+        }
+
+        function confirmReset() {
+            userBalance = INITIAL_BALANCE;
+            bet = MIN_BET;
+            saveBalance();
+            updateLobby();
+            closeResetModal();
+            showToast("Saldo berhasil direset menjadi Rp 50.000.", "success");
+        }
+
+        function showToast(message, type) {
+            window.clearTimeout(toastTimeout);
+            elements.toast.textContent = message;
+            elements.toast.classList.toggle("success", type === "success");
+            elements.toast.hidden = false;
+            toastTimeout = window.setTimeout(() => {
+                elements.toast.hidden = true;
+            }, 2400);
+        }
+
+        function setMode(mode) {
+            selectedMode = mode;
+            document.querySelectorAll("[data-mode]").forEach((button) => {
+                const selected = button.dataset.mode === mode;
+                button.classList.toggle("selected", selected);
+                button.setAttribute("aria-pressed", String(selected));
+            });
+            updateLobby();
+        }
+
+        function setPlayerCount(count) {
+            selectedPlayerCount = count;
+            document.querySelectorAll("[data-players]").forEach((button) => {
+                const selected = Number(button.dataset.players) === count;
+                button.classList.toggle("selected", selected);
+                button.setAttribute("aria-pressed", String(selected));
+            });
+            updateLobby();
+        }
+
+        function difficultyLabel(difficulty) {
+            if (difficulty === "easy") return "Mudah";
+            if (difficulty === "very-hard") return "Sangat Sulit";
+            return "Sulit";
+        }
+
+        function setDifficulty(difficulty) {
+            selectedDifficulty = difficulty;
+            document.querySelectorAll("[data-difficulty]").forEach((button) => {
+                const selected = button.dataset.difficulty === difficulty;
+                button.classList.toggle("selected", selected);
+                button.setAttribute("aria-pressed", String(selected));
+            });
+            updateLobby();
+        }
+
+        function shuffle(items) {
+            const result = items.slice();
+            for (let index = result.length - 1; index > 0; index--) {
+                const randomIndex = Math.floor(Math.random() * (index + 1));
+                [result[index], result[randomIndex]] = [result[randomIndex], result[index]];
+            }
+            return result;
+        }
+
+        function createDeck() {
+            const cards = [];
+            for (const suit of SUITS) {
+                for (let rank = 1; rank <= 13; rank++) {
+                    cardSequence += 1;
+                    cards.push({ id: `card-${cardSequence}`, rank, suit: suit.symbol, color: suit.color });
+                }
+            }
+            return shuffle(cards);
+        }
+
+        function cardName(card) {
+            if (card.rank === 1) return "A";
+            if (card.rank === 11) return "J";
+            if (card.rank === 12) return "Q";
+            if (card.rank === 13) return "K";
+            return String(card.rank);
+        }
+
+        function cardValue41(card) {
+            if (card.rank === 1) return 11;
+            return card.rank >= 10 ? 10 : card.rank;
+        }
+
+        function rankCangkulan(card) {
+            return card.rank === 1 ? 14 : card.rank;
+        }
+
+        function score41(hand) {
+            const totals = new Map(SUITS.map((suit) => [suit.symbol, 0]));
+            let total = 0;
+            for (const card of hand) {
+                const value = cardValue41(card);
+                total += value;
+                totals.set(card.suit, totals.get(card.suit) + value);
+            }
+            let best = -Infinity;
+            for (const suitTotal of totals.values()) {
+                best = Math.max(best, suitTotal - (total - suitTotal));
+            }
+            return hand.length === 0 ? 0 : best;
+        }
+
+        function bestScoreAfterDiscard(hand) {
+            if (hand.length <= 4) return score41(hand);
+            let best = -Infinity;
+            for (let index = 0; index < hand.length; index++) {
+                best = Math.max(best, score41(hand.filter((_, cardIndex) => cardIndex !== index)));
+            }
+            return best;
+        }
+
+        function takeCardWithBalancedOdds(pile, isSuitable) {
+            if (pile.length === 0) return null;
+            const suitable = pile.filter(isSuitable);
+            const unsuitable = pile.filter((card) => !isSuitable(card));
+            const pool = suitable.length && unsuitable.length
+                ? (Math.random() < 0.5 ? suitable : unsuitable)
+                : pile;
+            const selected = pool[Math.floor(Math.random() * pool.length)];
+            const index = pile.findIndex((card) => card.id === selected.id);
+            return pile.splice(index, 1)[0];
+        }
+
+        function drawRummyStockCard(hand) {
+            const currentScore = score41(hand);
+            return takeCardWithBalancedOdds(game.stock, (card) =>
+                bestScoreAfterDiscard(hand.concat(card)) >= currentScore
+            );
+        }
+
+        function drawCangkulanStockCard(hand) {
+            return takeCardWithBalancedOdds(game.stock, (card) =>
+                !game.currentSuit || card.suit === game.currentSuit
+            );
+        }
+
+        function botAccuracy() {
+            if (game.difficulty === "easy") return 0.4;
+            if (game.difficulty === "very-hard") return 0.85;
+            return 0.6;
+        }
+
+        function makePlayers() {
+            const players = [{ id: "user", name: "Kamu", isUser: true, balance: userBalance, hand: [] }];
+            const botCount = selectedPlayerCount - 1;
+            for (let index = 0; index < botCount; index++) {
+                const id = `bot-${index + 1}`;
+                const name = BOT_NAMES[index];
+                const savedBalance = botBalances.get(id);
+                players.push({ id, name, isUser: false, balance: savedBalance, hand: [] });
+            }
+            return shuffle(players);
+        }
+
+        function startGame() {
+            if (game && game.phase !== "lobby" && game.phase !== "result") return;
+            if (userBalance < MIN_BET || bet < MIN_BET || bet > userBalance) {
+                updateLobby();
+                return;
+            }
+
+            clearClocks();
+            const players = makePlayers();
+            const pot = bet * players.length;
+
+            for (const player of players) {
+                if (player.isUser) {
+                    userBalance -= bet;
+                    player.balance = userBalance;
+                } else {
+                    if (player.balance < bet) player.balance = Math.max(INITIAL_BALANCE, bet);
+                    player.balance -= bet;
+                    botBalances.set(player.id, player.balance);
+                }
+            }
+            saveBalance();
+            updateBalanceDisplay();
+
+            game = {
+                phase: "shuffle",
+                mode: selectedMode,
+                playerCount: selectedPlayerCount,
+                difficulty: selectedDifficulty,
+                bet,
+                pot,
+                players,
+                turnIndex: 0,
+                stock: [],
+                discardPile: [],
+                anchorCard: null,
+                selectedCardId: null,
+                hasDrawn: false,
+                drewThisTurn: false,
+                currentSuit: null,
+                trickCards: [],
+                trickTurns: 0,
+                trickLeaderIndex: 0,
+                waitingForNextTrick: false,
+                message: "Urutan giliran ditentukan secara acak.",
+            };
+
+            const cards = createDeck();
+            const cardsPerPlayer = game.mode === "remi41" ? 4 : 5;
+            for (let round = 0; round < cardsPerPlayer; round++) {
+                for (const player of players) player.hand.push(cards.pop());
+            }
+            game.stock = cards;
+            game.anchorCard = game.stock.pop();
+
+            if (game.mode === "remi41") {
+                game.discardPile.push(game.anchorCard);
+            } else {
+                game.currentSuit = game.anchorCard.suit;
+            }
+
+            elements.lobby.hidden = true;
+            elements.game.hidden = true;
+            document.querySelector("#reset-balance").hidden = true;
+            elements.shuffleOrder.innerHTML = players.map((player, index) =>
+                `<div class="order-row"><strong>GILIRAN ${index + 1}</strong><span>${player.name}${player.isUser ? " · pemain" : " · bot AI"}</span></div>`
+            ).join("");
+            elements.shuffleOverlay.hidden = false;
+            document.body.style.overflow = "hidden";
+
+            transitionTimeout = window.setTimeout(() => {
+                if (!game || game.phase !== "shuffle") return;
+                elements.shuffleOverlay.hidden = true;
+                document.body.style.overflow = "";
+                game.phase = "playing";
+                elements.game.hidden = false;
+                renderTable();
+                startTurn();
+
+                if (game.mode === "remi41") {
+                    const openingWinner = game.players.find((player) => score41(player.hand) >= 41);
+                    if (openingWinner) endRound(openingWinner);
+                }
+            }, 2500);
+        }
+
+        function clearClocks() {
+            window.clearTimeout(botThinkTimeout);
+            window.clearTimeout(transitionTimeout);
+            botThinkTimeout = null;
+            transitionTimeout = null;
+        }
+
+        function currentPlayer() {
+            return game.players[game.turnIndex];
+        }
+
+        function isUserTurn() {
+            return game && game.phase === "playing" && !game.waitingForNextTrick && currentPlayer().isUser;
+        }
+
+        function startTurn() {
+            if (!game || game.phase !== "playing") return;
+            clearClocks();
+            game.waitingForNextTrick = false;
+            game.selectedCardId = null;
+            game.hasDrawn = false;
+            game.drewThisTurn = false;
+            game.message = `${currentPlayer().name} sedang mendapat giliran.`;
+            renderTable();
+
+            if (!currentPlayer().isUser) {
+                const thinkTime = 1200 + Math.floor(Math.random() * 801);
+                botThinkTimeout = window.setTimeout(() => {
+                    if (game && game.phase === "playing" && !currentPlayer().isUser) runBotTurn();
+                }, thinkTime);
+            }
+        }
+
+        function renderTable() {
+            if (!game) return;
+            updateBalanceDisplay();
+            elements.gameTitle.textContent = game.mode === "remi41" ? "Remi 41" : "Cangkulan";
+            elements.modeTag.textContent = game.mode === "remi41" ? "REMI 41" : "CANGKULAN";
+            elements.potDisplay.textContent = formatRupiah(game.pot);
+            elements.tableDescription.textContent = game.mode === "remi41"
+                ? "Ambil satu kartu, pilih buanganmu, lalu incar skor 41."
+                : "Ikuti kembang acuan. Jika tidak punya, cangkul kartu dari deck.";
+
+            renderSeats();
+            renderPiles();
+            renderHand();
+            renderControls();
+
+            elements.gameMessage.textContent = game.message || "";
+            elements.liveScoreWrap.hidden = game.mode !== "remi41";
+            elements.gameRules.textContent = game.mode === "remi41"
+                ? "Remi 41: A = 11, K/Q/J/10 = 10. Deck memberi peluang 50/50 antara kartu yang meningkatkan potensi skor dan yang tidak, jika kedua kelompok masih tersedia."
+                : "Cangkulan: pilih keluarkan kartu sesuai kembang atau ambil kartu. Saat mencari kembang acuan, peluang cocok dan tidak cocok 50/50 jika keduanya masih ada. A tertinggi.";
+        }
+
+        function renderSeats() {
+            const activeIndex = game.turnIndex;
+            elements.seats.innerHTML = game.players.map((player, index) => {
+                const active = index === activeIndex && game.phase === "playing" && !game.waitingForNextTrick;
+                const detail = game.mode === "remi41"
+                    ? `${player.hand.length} kartu`
+                    : `${player.hand.length} kartu`;
+                const score = game.mode === "remi41" && player.isUser
+                    ? `<span>Skor <strong>${score41(player.hand)}</strong></span>`
+                    : `<span>${player.isUser ? "PEMAIN" : "BOT AI"}</span>`;
+                const turnStatus = active
+                    ? `<div class="seat-turn">GILIRAN SEKARANG</div>`
+                    : `<div class="seat-turn waiting">${player.isUser ? "Kursi pemain" : "Menunggu giliran"}</div>`;
+                return `<article class="seat${active ? " active" : ""}${player.isUser ? " is-user" : ""}" id="seat-${player.id}" data-seat-index="${index}">
+                    <div class="seat-head"><span class="seat-avatar">${player.isUser ? "K" : player.name.charAt(0)}</span><span class="seat-name">${player.name}</span><span class="seat-order">${index + 1}</span></div>
+                    <div class="seat-info"><span>${detail}</span>${score}</div>${turnStatus}
+                </article>`;
+            }).join("");
+        }
+
+        function faceCardMarkup(card, extraClass) {
+            if (!card) return `<div class="pile-card" aria-hidden="true">✦</div>`;
+            const red = card.color === "red" ? " red" : "";
+            return `<div class="face-card${red}${extraClass ? ` ${extraClass}` : ""}" aria-label="${cardName(card)} ${card.suit}"><strong>${cardName(card)}</strong><span>${card.suit}</span></div>`;
+        }
+
+        function renderPiles() {
+            elements.deckCount.textContent = `${game.stock.length} kartu`;
+            elements.discardView.innerHTML = game.mode === "remi41"
+                ? faceCardMarkup(game.discardPile[game.discardPile.length - 1], "")
+                : faceCardMarkup(game.anchorCard, "");
+            elements.discardCount.textContent = game.mode === "remi41"
+                ? `${game.discardPile.length} di buangan`
+                : "kartu acuan awal";
+            elements.deckTitle.textContent = game.mode === "remi41" ? "Deck tertutup" : "Deck cangkul";
+            elements.discardTitle.textContent = game.mode === "remi41" ? "Kartu buangan" : "Kembang acuan";
+
+            if (game.mode === "remi41") {
+                elements.centerMessage.textContent = game.hasDrawn && isUserTurn()
+                    ? "Pilih satu kartu untuk dibuang"
+                    : "Ambil satu kartu untuk mulai giliran";
+                elements.anchorCard.hidden = true;
+                elements.centerCards.innerHTML = `<span class="trick-suit">♠ ♥ ♦ ♣</span>`;
+            } else {
+                const leadText = game.currentSuit
+                    ? `Kembang acuan ${game.currentSuit}`
+                    : `${game.players[game.trickLeaderIndex].name} bebas memilih kembang`;
+                elements.centerMessage.textContent = leadText;
+                elements.anchorCard.hidden = false;
+                elements.anchorCard.innerHTML = `Kartu pembuka ${faceCardMarkup(game.anchorCard, "")}`;
+                elements.centerCards.innerHTML = game.trickCards.length
+                    ? game.trickCards.map((play) => `<div class="trick-play">${faceCardMarkup(play.card, "")}<small>${play.player.name}</small></div>`).join("")
+                    : `<span class="trick-suit">${game.currentSuit || "✦"}</span>`;
+            }
+        }
+
+        function renderHand() {
+            if (!game) return;
+            const user = game.players.find((player) => player.isUser);
+            const active = isUserTurn();
+            elements.handCards.classList.toggle("inactive", !active);
+            elements.handCards.innerHTML = user.hand.map((card) => {
+                const selected = card.id === game.selectedCardId;
+                const illegal = game.mode === "cangkulan" && game.currentSuit && card.suit !== game.currentSuit;
+                return `<button type="button" class="playing-card${card.color === "red" ? " red" : ""}${selected ? " selected" : ""}${illegal ? " illegal" : ""}" data-card-id="${card.id}" aria-label="${cardName(card)} ${card.suit}" aria-pressed="${selected}" ${active ? "" : "disabled"}>
+                    <strong>${cardName(card)}</strong><span>${card.suit}</span>
+                </button>`;
+            }).join("");
+
+            elements.handCards.querySelectorAll("[data-card-id]").forEach((button) => {
+                const id = button.dataset.cardId;
+                button.addEventListener("click", () => selectCard(id));
+                button.addEventListener("dblclick", () => {
+                    if (game.mode === "remi41") discardRummyCard(id);
+                    else playCangkulanCard(id);
+                });
+            });
+
+            if (game.mode === "remi41") {
+                const score = user.hand.length > 4 && game.selectedCardId
+                    ? score41(user.hand.filter((card) => card.id !== game.selectedCardId))
+                    : bestScoreAfterDiscard(user.hand);
+                elements.liveScore.textContent = String(score);
+            }
+        }
+
+        function renderControls() {
+            const active = isUserTurn();
+            const user = game.players.find((player) => player.isUser);
+            if (!active) {
+                elements.gameControls.innerHTML = `<p class="turn-hint">${currentPlayer().name} sedang berpikir. Giliranmu akan segera tiba.</p>`;
+                return;
+            }
+
+            if (game.mode === "remi41") {
+                const canDraw = !game.hasDrawn;
+                const deckDisabled = !canDraw || game.stock.length === 0;
+                const discardDisabled = !canDraw || game.discardPile.length === 0;
+                const canDiscard = game.hasDrawn && game.selectedCardId !== null;
+                const score = score41(user.hand);
+                const claimEnabled = score >= 41 && user.hand.length === 4;
+                elements.gameControls.innerHTML = `
+                    <button class="button button-secondary" type="button" data-action="draw-deck" ${deckDisabled ? "disabled" : ""}>Ambil dari Deck</button>
+                    <button class="button button-secondary" type="button" data-action="draw-discard" ${discardDisabled ? "disabled" : ""}>Ambil Kartu Buangan</button>
+                    <button class="button button-primary" type="button" data-action="discard" ${canDiscard ? "" : "disabled"}>Buang Kartu</button>
+                    <button class="button claim-button" type="button" data-action="claim" ${claimEnabled ? "" : "disabled"}>Klaim 41</button>
+                    <p class="turn-hint">${game.hasDrawn ? "Pilih kartu lalu buang, atau klik dua kali kartu pilihan." : "Ambil dari deck atau dari tumpukan buangan untuk memulai."}</p>`;
+            } else {
+                const matching = user.hand.some((card) => !game.currentSuit || card.suit === game.currentSuit);
+                const selectedCard = user.hand.find((card) => card.id === game.selectedCardId);
+                const canPlay = Boolean(selectedCard && (!game.currentSuit || selectedCard.suit === game.currentSuit));
+                const canDig = game.stock.length > 0 && (!matching || !game.drewThisTurn);
+                const canPass = !matching && game.stock.length === 0;
+                elements.gameControls.innerHTML = `
+                    <button class="button button-primary" type="button" data-action="play-card" ${canPlay ? "" : "disabled"}>Keluarkan Kartu</button>
+                    ${canDig ? `<button class="button button-secondary" type="button" data-action="dig">${matching ? "Ambil 1 Kartu" : "Cangkul"}</button>` : ""}
+                    ${canPass ? `<button class="button button-secondary" type="button" data-action="pass">Lewat (Pass)</button>` : ""}
+                    <p class="turn-hint">${matching ? canDig ? "Kamu boleh keluarkan kartu yang cocok atau ambil satu kartu lebih dulu." : "Pilih kartu dengan kembang acuan, lalu keluarkan." : canDig ? "Tidak ada kembang yang cocok. Cangkul sampai menemukan yang sesuai." : "Deck habis dan tak ada kembang cocok. Lewati giliran."}</p>`;
+            }
+
+            elements.gameControls.querySelectorAll("[data-action]").forEach((button) => {
+                button.addEventListener("click", () => handleUserAction(button.dataset.action));
+            });
+        }
+
+        function selectCard(id) {
+            if (!isUserTurn()) return;
+            const user = game.players.find((player) => player.isUser);
+            const card = user.hand.find((item) => item.id === id);
+            if (!card) return;
+
+            if (game.mode === "cangkulan" && game.currentSuit && card.suit !== game.currentSuit) {
+                showToast("Kembang harus sama!", "error");
+                shakeHand();
+            }
+
+            game.selectedCardId = game.selectedCardId === id ? null : id;
+            renderTable();
+        }
+
+        function shakeHand() {
+            elements.handCards.classList.remove("shake");
+            void elements.handCards.offsetWidth;
+            elements.handCards.classList.add("shake");
+            window.setTimeout(() => elements.handCards.classList.remove("shake"), 360);
+        }
+
+        function handleUserAction(action) {
+            if (!isUserTurn()) return;
+            if (action === "draw-deck") drawRummyCard("deck");
+            else if (action === "draw-discard") drawRummyCard("discard");
+            else if (action === "discard") discardRummyCard(game.selectedCardId);
+            else if (action === "claim") claim41();
+            else if (action === "play-card") playCangkulanCard(game.selectedCardId);
+            else if (action === "dig") digCangkulanCard();
+            else if (action === "pass") passCangkulanTurn();
+        }
+
+        function drawRummyCard(source) {
+            if (!isUserTurn() || game.mode !== "remi41" || game.hasDrawn) return;
+            const user = game.players.find((player) => player.isUser);
+            let card = null;
+            if (source === "deck") {
+                card = drawRummyStockCard(user.hand);
+            } else {
+                card = game.discardPile.pop() || null;
+            }
+
+            if (!card) {
+                showToast(source === "deck" ? "Deck sudah habis." : "Tumpukan buangan kosong.", "error");
+                if (game.stock.length === 0) finishRemiByScore();
+                return;
+            }
+
+            user.hand.push(card);
+            game.hasDrawn = true;
+            game.selectedCardId = null;
+            game.message = `${user.name} mengambil satu kartu. Pilih kartu untuk dibuang.`;
+            renderTable();
+        }
+
+        function discardRummyCard(cardId) {
+            if (!isUserTurn() || game.mode !== "remi41") return;
+            if (!game.hasDrawn) {
+                showToast("Ambil satu kartu terlebih dahulu.", "error");
+                return;
+            }
+            if (!cardId) {
+                showToast("Pilih kartu yang ingin dibuang.", "error");
+                return;
+            }
+
+            const user = game.players.find((player) => player.isUser);
+            const index = user.hand.findIndex((card) => card.id === cardId);
+            if (index < 0) return;
+            game.discardPile.push(user.hand.splice(index, 1)[0]);
+            game.message = `${user.name} membuang kartu.`;
+            finishRummyTurn(user);
+        }
+
+        function finishRummyTurn(player) {
+            game.selectedCardId = null;
+            game.hasDrawn = false;
+            renderTable();
+
+            if (score41(player.hand) >= 41) {
+                endRound(player);
+                return;
+            }
+            if (game.stock.length === 0) {
+                finishRemiByScore();
+                return;
+            }
+            game.turnIndex = (game.turnIndex + 1) % game.players.length;
+            startTurn();
+        }
+
+        function claim41() {
+            if (!game || game.phase !== "playing" || game.mode !== "remi41") return;
+            const user = game.players.find((player) => player.isUser);
+            if (user.hand.length !== 4 || score41(user.hand) < 41) {
+                showToast("Skor kamu belum mencapai 41.", "error");
+                return;
+            }
+            endRound(user);
+        }
+
+        function finishRemiByScore() {
+            if (!game || game.phase !== "playing") return;
+            const winner = game.players.reduce((best, player) =>
+                score41(player.hand) > score41(best.hand) ? player : best
+            );
+            game.message = "Deck habis. Skor akhir semua pemain telah dihitung.";
+            endRound(winner);
+        }
+
+        function botRummyTurn(player) {
+            if (!game.hasDrawn) {
+                const discardChance = game.difficulty === "easy" ? 0.16 : game.difficulty === "very-hard" ? 0.48 : 0.32;
+                const takeDiscard = game.discardPile.length > 0 && (game.stock.length === 0 || Math.random() < discardChance);
+                const drawn = takeDiscard ? game.discardPile.pop() : drawRummyStockCard(player.hand);
+                if (drawn) player.hand.push(drawn);
+                else if (game.discardPile.length > 0) player.hand.push(game.discardPile.pop());
+                game.hasDrawn = true;
+            }
+
+            if (player.hand.length === 0) {
+                finishRemiByScore();
+                return;
+            }
+            let bestIndex = 0;
+            let bestScore = -Infinity;
+            const candidates = [];
+            for (let index = 0; index < player.hand.length; index++) {
+                const candidateScore = score41(player.hand.filter((_, cardIndex) => cardIndex !== index));
+                if (candidateScore > bestScore) {
+                    bestScore = candidateScore;
+                    candidates.length = 0;
+                    candidates.push(index);
+                } else if (candidateScore === bestScore) {
+                    candidates.push(index);
+                }
+            }
+            const accuracy = botAccuracy();
+            bestIndex = Math.random() < accuracy
+                ? candidates[Math.floor(Math.random() * candidates.length)]
+                : Math.floor(Math.random() * player.hand.length);
+            game.discardPile.push(player.hand.splice(bestIndex, 1)[0]);
+            game.message = `${player.name} mengambil dan membuang kartu.`;
+            finishRummyTurn(player);
+        }
+
+        function runBotTurn() {
+            if (!game || game.phase !== "playing" || currentPlayer().isUser) return;
+            window.clearTimeout(botThinkTimeout);
+            botThinkTimeout = null;
+            const player = currentPlayer();
+            game.message = `${player.name} sedang memilih langkah...`;
+
+            if (game.mode === "remi41") {
+                botRummyTurn(player);
+            } else {
+                autoCangkulanTurn(player);
+            }
+        }
+
+        function cangkulanCanPlay(card) {
+            return !game.currentSuit || card.suit === game.currentSuit;
+        }
+
+        function playCangkulanCard(cardId) {
+            if (!isUserTurn() || game.mode !== "cangkulan") return;
+            if (!cardId) {
+                showToast("Pilih kartu yang ingin dikeluarkan.", "error");
+                return;
+            }
+            const user = game.players.find((player) => player.isUser);
+            const index = user.hand.findIndex((card) => card.id === cardId);
+            if (index < 0) return;
+            const card = user.hand[index];
+
+            if (!cangkulanCanPlay(card)) {
+                showToast("Kembang harus sama!", "error");
+                shakeHand();
+                return;
+            }
+
+            user.hand.splice(index, 1);
+            if (!game.currentSuit) game.currentSuit = card.suit;
+            game.trickCards.push({ player: user, card });
+            game.message = `${user.name} mengeluarkan ${cardName(card)} ${card.suit}.`;
+            completeCangkulanTurn(user);
+        }
+
+        function digCangkulanCard() {
+            if (!isUserTurn() || game.mode !== "cangkulan") return;
+            const user = game.players.find((player) => player.isUser);
+            const hasMatch = user.hand.some((card) => cangkulanCanPlay(card));
+            if (hasMatch && game.drewThisTurn) {
+                showToast("Kamu sudah mengambil kartu. Keluarkan kartu yang cocok.", "error");
+                return;
+            }
+            if (game.stock.length === 0) {
+                renderControls();
+                return;
+            }
+
+            const card = drawCangkulanStockCard(user.hand);
+            if (!card) return;
+            user.hand.push(card);
+            game.drewThisTurn = true;
+            game.message = !game.currentSuit || card.suit === game.currentSuit
+                ? `Kamu mengambil ${cardName(card)} ${card.suit}. Kartu itu cocok, keluarkan sekarang.`
+                : `Kamu mencangkul satu kartu. ${game.stock.length ? "Belum cocok — cangkul lagi." : "Deck habis, kamu boleh lewat."}`;
+            renderTable();
+        }
+
+        function passCangkulanTurn() {
+            if (!isUserTurn() || game.mode !== "cangkulan") return;
+            const user = game.players.find((player) => player.isUser);
+            if (user.hand.some((card) => cangkulanCanPlay(card))) {
+                showToast("Kamu masih punya kartu dengan kembang yang cocok.", "error");
+                return;
+            }
+            if (game.stock.length > 0) {
+                showToast("Cangkul kartu selama deck masih tersedia.", "error");
+                return;
+            }
+            game.message = `${user.name} melewati giliran.`;
+            completeCangkulanTurn(user);
+        }
+
+        function completeCangkulanTurn(player) {
+            game.selectedCardId = null;
+            renderTable();
+
+            if (player.hand.length === 0) {
+                endRound(player);
+                return;
+            }
+
+            game.trickTurns += 1;
+            if (game.trickTurns >= game.players.length) {
+                resolveCangkulanTrick();
+                return;
+            }
+            game.turnIndex = (game.turnIndex + 1) % game.players.length;
+            startTurn();
+        }
+
+        function resolveCangkulanTrick() {
+            const previousLeader = game.trickLeaderIndex;
+            let winnerIndex = previousLeader;
+            if (game.trickCards.length > 0) {
+                let winningPlay = game.trickCards[0];
+                for (const play of game.trickCards.slice(1)) {
+                    if (rankCangkulan(play.card) > rankCangkulan(winningPlay.card)) winningPlay = play;
+                }
+                winnerIndex = game.players.indexOf(winningPlay.player);
+            }
+
+            const winner = game.players[winnerIndex];
+            game.turnIndex = winnerIndex;
+            game.trickLeaderIndex = winnerIndex;
+            game.trickTurns = 0;
+            game.currentSuit = null;
+            game.waitingForNextTrick = true;
+            game.message = `${winner.name} memenangkan putaran dan memimpin berikutnya.`;
+            renderTable();
+
+            window.clearTimeout(botThinkTimeout);
+            botThinkTimeout = null;
+            transitionTimeout = window.setTimeout(() => {
+                if (!game || game.phase !== "playing") return;
+                game.trickCards = [];
+                game.message = `${winner.name} bebas memilih kembang untuk putaran baru.`;
+                startTurn();
+            }, 850);
+        }
+
+        function autoCangkulanTurn(player) {
+            if (!game || game.phase !== "playing") return;
+            let playable = player.hand.filter((card) => cangkulanCanPlay(card));
+
+            const optionalDrawChance = game.difficulty === "easy" ? 0.08 : game.difficulty === "very-hard" ? 0.2 : 0.13;
+            if (playable.length > 0 && game.stock.length > 0 && !game.drewThisTurn && Math.random() < optionalDrawChance) {
+                player.hand.push(drawCangkulanStockCard(player.hand));
+                game.drewThisTurn = true;
+                playable = player.hand.filter((card) => cangkulanCanPlay(card));
+            }
+
+            while (playable.length === 0 && game.stock.length > 0) {
+                player.hand.push(game.stock.pop());
+                game.drewThisTurn = true;
+                playable = player.hand.filter((card) => cangkulanCanPlay(card));
+            }
+
+            if (playable.length > 0) {
+                const accuracy = botAccuracy();
+                let chosen = playable[Math.floor(Math.random() * playable.length)];
+                if (Math.random() < accuracy) {
+                    for (const card of playable) {
+                        if (rankCangkulan(card) > rankCangkulan(chosen)) chosen = card;
+                    }
+                }
+                const index = player.hand.findIndex((card) => card.id === chosen.id);
+                player.hand.splice(index, 1);
+                if (!game.currentSuit) game.currentSuit = chosen.suit;
+                game.trickCards.push({ player, card: chosen });
+                game.message = `${player.name} mengeluarkan ${cardName(chosen)} ${chosen.suit}.`;
+            } else {
+                game.message = `${player.name} melewati giliran.`;
+            }
+            completeCangkulanTurn(player);
+        }
+
+        function endRound(winner) {
+            if (!game || game.phase === "result") return;
+            clearClocks();
+            game.phase = "result";
+
+            if (winner.isUser) {
+                userBalance += game.pot;
+                saveBalance();
+                elements.resultTitle.textContent = "SELAMAT, KAMU MENANG!";
+                elements.resultDetail.textContent = `+${formatRupiah(game.pot)} · seluruh Pot Meja`;
+                elements.resultIcon.textContent = "✦";
+            } else {
+                winner.balance += game.pot;
+                botBalances.set(winner.id, winner.balance);
+                elements.resultTitle.textContent = "KAMU KALAH!";
+                elements.resultDetail.textContent = `Pemenang: ${winner.name} · -${formatRupiah(game.bet)}`;
+                elements.resultIcon.textContent = "↗";
+            }
+
+            updateBalanceDisplay();
+            elements.resultModal.hidden = false;
+            document.body.style.overflow = "hidden";
+            document.querySelector("#return-to-menu").focus();
+        }
+
+        function returnToLobby() {
+            elements.resultModal.hidden = true;
+            document.body.style.overflow = "";
+            elements.game.hidden = true;
+            elements.lobby.hidden = false;
+            document.querySelector("#reset-balance").hidden = false;
+            game = null;
+            if (userBalance >= MIN_BET && bet < MIN_BET) bet = MIN_BET;
+            if (bet > userBalance) bet = userBalance;
+            updateLobby();
+            document.querySelector("#start-game").focus();
+        }
+
+        document.querySelectorAll("[data-mode]").forEach((button) => {
+            button.addEventListener("click", () => setMode(button.dataset.mode));
+        });
+        document.querySelectorAll("[data-players]").forEach((button) => {
+            button.addEventListener("click", () => setPlayerCount(Number(button.dataset.players)));
+        });
+        document.querySelectorAll("[data-difficulty]").forEach((button) => {
+            button.addEventListener("click", () => setDifficulty(button.dataset.difficulty));
+        });
+        document.querySelector("#bet-decrease").addEventListener("click", () => setBet(bet - BET_STEP));
+        document.querySelector("#bet-increase").addEventListener("click", () => setBet(bet + BET_STEP));
+        document.querySelector("#bet-all-in").addEventListener("click", () => setBet(userBalance));
+        document.querySelector("#reset-balance").addEventListener("click", openResetModal);
+        document.querySelector("#reset-balance-secondary").addEventListener("click", openResetModal);
+        document.querySelector("#cancel-reset").addEventListener("click", closeResetModal);
+        document.querySelector("#confirm-reset").addEventListener("click", confirmReset);
+        document.querySelector("#start-game").addEventListener("click", startGame);
+        document.querySelector("#return-to-menu").addEventListener("click", returnToLobby);
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && !elements.resetModal.hidden) closeResetModal();
+        });
+
+        elements.resetModal.addEventListener("click", (event) => {
+            if (event.target === elements.resetModal) closeResetModal();
+        });
+
+        updateLobby();
+    </script>
+</body>
+</html>
